@@ -92,7 +92,7 @@ module.exports = function (grunt) {
 				externalConfigs.copy[this.name].files = externalConfigs.copy[this.name].files.concat(mappedContent);
 			}, this);
 
-			runTasks.call(this, externalConfigs, ['copy']);
+			runTasks(this.name, externalConfigs, ['copy']);
 
 		} else if (context.NODE_ENV == 'PRODUCTION'){
 			//  Concatenate and uglify the files to build
@@ -111,7 +111,7 @@ module.exports = function (grunt) {
 				}
 			}, this);
 
-			runTasks.call(this, externalConfigs, ['concat', 'uglify', 'cssmin']);
+			runTasks(this.name, externalConfigs, ['concat', 'uglify', 'cssmin']);
 		}
 
 		// Get the file defined for index
