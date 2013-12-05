@@ -42,9 +42,11 @@ module.exports = function (grunt) {
 
 		// Configuration to be run (and then tested).
 		asset_packager: {
+			options: {
+				index: 'test/fixtures/index.html',
+			},
 			dev: {
 				options: {
-					index: 'test/fixtures/index.html',
 					dest: 'tmp/dev'
 				},
 				files: [
@@ -53,7 +55,6 @@ module.exports = function (grunt) {
 			},
 			prod: {
 				options: {
-					index: 'test/fixtures/index.html',
 					dest: 'tmp/prod'
 				},
 				files: [
