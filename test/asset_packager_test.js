@@ -27,21 +27,35 @@ exports.asset_packager = {
     // setup here if necessary
     done();
   },
-  default_options: function (test) {
-    test.expect(1);
-
-    var actual = grunt.file.read('tmp/default_options');
-    var expected = grunt.file.read('test/expected/default_options');
-    test.equal(actual, expected, 'should describe what the default behavior is.');
+  dev: function (test) {
+    test.expect(4);
+	
+	test.ok(grunt.file.exists('tmp/dev'), 'should create dev directory.');
+	
+	test.ok(grunt.file.exists('tmp/dev/index.html'), 'should copy index.html.');
+	test.equal(grunt.file.read('tmp/dev/index.html'), grunt.file.read('test/expected/dev/index.html'), 'should correctly format index.html');
+	
+	var jsFilesExist = grunt.file.exists('tmp/dev/test/fixtures/js/file1.js') && grunt.file.exists('tmp/dev/test/fixtures/js/file2.js');
+	test.ok(jsFilesExist, 'should copy js files');
 
     test.done();
   },
-  custom_options: function (test) {
-    test.expect(1);
+  prod: function (test) {
+    test.expect(7);
 
-    var actual = grunt.file.read('tmp/custom_options');
-    var expected = grunt.file.read('test/expected/custom_options');
-    test.equal(actual, expected, 'should describe what the custom option(s) behavior is.');
+    test.ok(grunt.file.exists('tmp/prod'), 'should create dev directory.');
+	
+	test.ok(grunt.file.exists('tmp/prod/index.html'), 'should copy index.html.');
+	test.equal(grunt.file.read('tmp/prod/index.html'), grunt.file.read('test/expected/prod/index.html'), 'should correctly format index.html');
+	
+	test.ok(grunt.file.exists('tmp/prod/common.js'), 'should create packaged js file');
+	var actualPackagedJS = grunt.file.read('tmp/prod/common.js'),
+	    expectedPackagedJS = grunt.file.read('test/expected/prod/common.js'),
+	    actualLines = actualPackagedJS.split(grunt.util.linefeed),
+	    expectedLines = expectedPackagedJS.split(grunt.util.linefeed);
+	test.equal(actualLines.length, 2, 'packaged js should contain 2 lines.');
+	test.equal(actualLines[1], expectedLines[1], 'should concat and uglify javascript');
+	test.ok(/\/\/Generated at \d\d-\d\d-\d\d\d\d \d?\d:\d\d:\d\d [A|P]M/.test(actualLines[0]), 'should include banner in packaged javascript'); 
 
     test.done();
   }
