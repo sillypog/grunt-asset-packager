@@ -2,6 +2,24 @@
 
 > Packages javascript and stylesheets similarly to the smart_asset gem.
 
+## Why use asset-packager?
+This task makes it easy to compile local and production versions of a static site. Rather than putting stylesheet and javascript includes directly in the html file they are put into package files; it is the package files that are referenced from the html file.
+
+For example, a package file named `common.js` might contain the following lines:
+```
+src/js/file1.js
+src/js/file2/js
+```
+
+`index.html` would then have this tag referencing that package:
+```html
+<script-package src="common.js" />
+```
+
+When the task is run with NODE_ENV set to 'DEVELOPMENT' [(see grunt-env)](https://npmjs.org/package/grunt-env), the javascript files will be copied to the build directory and the `<script-package>` tag replaced by `<script>` tags including each file.
+
+When the task is run with NODE_ENV set to 'PRODUCTION', the javascript files will be concatenated and uglified into a single file named `common.js` and the `<script-package>` tag replaced by a single `<script>` tag including that file.
+
 ## Getting Started
 This plugin requires Grunt.
 
@@ -37,47 +55,33 @@ grunt.initConfig({
 
 ### Options
 
-#### options.separator
+#### options.index
 Type: `String`
-Default value: `',  '`
 
-A string value that is used to do something with whatever.
+Path to the index file containing package includes.
 
-#### options.punctuation
+#### options.dest
 Type: `String`
 Default value: `'.'`
 
-A string value that is used to do something else with whatever else.
+Path to the folder that will contained the final compiled index file and assets.
 
-### Usage Examples
+### Usage Example
 
-#### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
-
-```js
-grunt.initConfig({
-  asset_packager: {
-    options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-})
-```
-
-#### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
+In this example, index and asset files live within the `src` folder. These will be compiled to a new folder named `build`.
 
 ```js
 grunt.initConfig({
   asset_packager: {
     options: {
-      separator: ': ',
-      punctuation: ' !!!',
-    },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
+	    index: 'src/index.html',
+	    dest: 'build'
+	   },
+	   build: {
+	    files: [
+	    	{ src: ['src/asset_packages/**/*.pkg'], expand: true}
+	    ]
+	   }
   },
 })
 ```
