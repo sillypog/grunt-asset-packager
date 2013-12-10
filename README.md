@@ -1,4 +1,4 @@
-# grunt-asset-packager
+# grunt-asset-packager [![Build Status](https://travis-ci.org/sillypog/grunt-asset-packager.png?branch=master)](https://travis-ci.org/sillypog/grunt-asset-packager)
 
 > Packages javascript and stylesheets similarly to the smart_asset gem.
 
