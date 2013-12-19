@@ -43,7 +43,7 @@ module.exports = function (grunt) {
 		// Configuration to be run (and then tested).
 		asset_packager: {
 			options: {
-				index: 'test/fixtures/index.html',
+				index: 'test/fixtures/index.html'
 			},
 			dev: {
 				options: {

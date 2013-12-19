@@ -27,7 +27,7 @@
   ],
   "dependencies": {
     "lodash": "~2.4.1",
-    "chop": "0.0.1"
+    "chomp": "0.0.1"
   },
   "peerDependencies": {
     "grunt": "~0.4.0rc2",

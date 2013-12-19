@@ -24,7 +24,7 @@ var fs = require('fs'),
     path = require('path'),
     util = require('util'),
     _ = require('lodash'),
-    chop = require('chop');
+    chomp = require('chomp');
 
 module.exports = function (grunt) {
 
@@ -77,9 +77,9 @@ module.exports = function (grunt) {
 
 		this.files.forEach(function(file){
 			grunt.log.writeln('\nProcessing asset file: '+file.src);
-			var content = chop.chomp(grunt.file.read(file.src)),
+			var content = grunt.file.read(file.src),
 			    packageName = path.basename(file.src, path.extname(file.src));
-			    packages[packageName] = content.split(grunt.util.linefeed);
+			    packages[packageName] = content.chomp().split(grunt.util.linefeed);
 		}, this);
 
 		if (context.NODE_ENV == 'DEVELOPMENT'){
