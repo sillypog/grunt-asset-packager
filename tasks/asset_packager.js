@@ -1,7 +1,7 @@
 /*
 * grunt-asset-packager
 * https://github.com/sillypog/grunt-asset-packager
-* 
+*
 *
 * Copyright (c) 2013 Peter Hastie
 * Licensed under the MIT license.
@@ -23,7 +23,8 @@
 var fs = require('fs'),
     path = require('path'),
     util = require('util'),
-    _ = require('lodash');
+    _ = require('lodash'),
+    chop = require('chop');
 
 module.exports = function (grunt) {
 
@@ -76,7 +77,7 @@ module.exports = function (grunt) {
 
 		this.files.forEach(function(file){
 			grunt.log.writeln('\nProcessing asset file: '+file.src);
-			var content = grunt.file.read(file.src),
+			var content = chop.chomp(grunt.file.read(file.src)),
 			    packageName = path.basename(file.src, path.extname(file.src));
 			    packages[packageName] = content.split(grunt.util.linefeed);
 		}, this);
