@@ -1,3 +1,6 @@
-h2 {
-	color: #0000FF;
+.built {
+	color: #00FF00;
+}
+.not-built {
+	color: #FF0000;
 }
