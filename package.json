@@ -1,6 +1,6 @@
 {
   "name": "grunt-asset-packager",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Packages javascript and stylesheets similarly to the smart_asset gem.",
   "homepage": "https://github.com/sillypog/grunt-asset-packager",
   "repository": {
