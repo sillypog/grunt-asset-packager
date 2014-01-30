@@ -32,7 +32,7 @@ module.exports = function (grunt) {
 	// creation: http://gruntjs.com/creating-tasks
 
 	function processLine(packages, match, lineOpen, lineClose, env){
-		var packageName = match[2];
+		var packageName = match[3];
 		if (packages[packageName]){
 			if (env == 'DEVELOPMENT'){
 				// Replace the package line in the array with a line built from the package
@@ -51,11 +51,14 @@ module.exports = function (grunt) {
 		return whitespace + lineOpen + fileName + lineClose;
 	}
 
-	function writePartial(match){
-		var path = match[2],
+	function writePartial(match, process, options){
+		var path = match[3],
 			text = '';
 		if (grunt.file.exists(path) && grunt.file.isFile(path)){
 			text = grunt.file.read(path);// content of file
+			if (process){
+				text = grunt.template.process(text, options.process);
+			}
 		} else {
 			grunt.warn('No partial: '+path);
 		}
@@ -132,9 +135,12 @@ module.exports = function (grunt) {
 		// Replace the marker with the contents of the appropriate package from package object
 		var indexContent = grunt.file.read(options.index),
 		    indexLines = indexContent.split(grunt.util.linefeed),
-		    partialRegEx = /(\s*)<script-partial src=["|'](.+)["|']/,
-		    scriptRegEx = /(\s*)<script-package src=["|'](.+)["|']/,
-		    styleRegEx = /(\s*)<style-package src=["|'](.+)["|']/;  // Storing the whitespace so we can preserve it
+		    // Regex use backreferencing (eg \1) to identify the type of quote used and select everything between that set.
+		    // This still probably won't work with escaped quotes within a string
+		    partialRegEx = /(\s*)<script-partial src=(["|'])([^\2]+?)\2/,
+		    processRegEx = /process=(["|'])true\1/,
+		    scriptRegEx = /(\s*)<script-package src=(["|'])([^\2]+?)\2/,
+		    styleRegEx = /(\s*)<style-package src=(["|'])([^\2]+?)\2/;  // Storing the whitespace so we can preserve it
 
 		indexLines.forEach(function(line, i, lines){
 			var match;
@@ -143,7 +149,7 @@ module.exports = function (grunt) {
 			} else if (match = line.match(styleRegEx)){
 				lines[i] = processLine(packages, match, '<link rel="stylesheet" href="', '">', context.NODE_ENV);
 			} else if (match = line.match(partialRegEx)){
-				lines[i] = writePartial(match);
+				lines[i] = writePartial(match, processRegEx.test(line), options);
 			}
 		}, this);
 
