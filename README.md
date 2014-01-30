@@ -20,6 +20,8 @@ When the task is run with NODE_ENV set to 'DEVELOPMENT' [(see grunt-env)](https:
 
 When the task is run with NODE_ENV set to 'PRODUCTION', the javascript files will be concatenated and uglified into a single file named `common.js` and the `<script-package>` tag replaced by a single `<script>` tag including that file.
 
+Unprocessed files can also be included at any point using `<script-partial>` tags.
+
 ## Getting Started
 This plugin requires Grunt.
 

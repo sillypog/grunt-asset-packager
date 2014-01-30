@@ -51,6 +51,17 @@ module.exports = function (grunt) {
 		return whitespace + lineOpen + fileName + lineClose;
 	}
 
+	function writePartial(match){
+		var path = match[2],
+			text = '';
+		if (grunt.file.exists(path) && grunt.file.isFile(path)){
+			text = grunt.file.read(path);// content of file
+		} else {
+			grunt.warn('No partial: '+path);
+		}
+		return text;
+	}
+
 	function createExternalConfig(name, configs, task, options, files){
 		configs[task] = grunt.config(task) || {};
 		configs[task][name] = { files: files || {} };
@@ -121,6 +132,7 @@ module.exports = function (grunt) {
 		// Replace the marker with the contents of the appropriate package from package object
 		var indexContent = grunt.file.read(options.index),
 		    indexLines = indexContent.split(grunt.util.linefeed),
+		    partialRegEx = /(\s*)<script-partial src=["|'](.+)["|']/,
 		    scriptRegEx = /(\s*)<script-package src=["|'](.+)["|']/,
 		    styleRegEx = /(\s*)<style-package src=["|'](.+)["|']/;  // Storing the whitespace so we can preserve it
 
@@ -130,6 +142,8 @@ module.exports = function (grunt) {
 				lines[i] = processLine(packages, match, '<script src="', '"></script>', context.NODE_ENV);
 			} else if (match = line.match(styleRegEx)){
 				lines[i] = processLine(packages, match, '<link rel="stylesheet" href="', '">', context.NODE_ENV);
+			} else if (match = line.match(partialRegEx)){
+				lines[i] = writePartial(match);
 			}
 		}, this);
 
