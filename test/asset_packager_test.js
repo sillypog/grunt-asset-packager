@@ -41,7 +41,7 @@ exports.asset_packager = {
 		test.done();
 	},
 	prod: function (test) {
-		test.expect(10);
+		test.expect(11);
 
 		test.ok(grunt.file.exists('tmp/prod'), 'should create dev directory.');
 
@@ -63,6 +63,8 @@ exports.asset_packager = {
 
 		test.equal(actualCSSLines.length, 2, 'packaged css should contain 2 lines.');
 		test.equal(actualCSSLines[1], expectedCSSLines[1], 'should concat and minify css');
+
+		test.ok(grunt.file.exists('tmp/prod/concatenated.js'));
 
 		test.done();
 	}

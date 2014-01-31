@@ -66,6 +66,14 @@ module.exports = function (grunt) {
 		// Unit tests.
 		nodeunit: {
 			tests: ['test/*_test.js']
+		},
+
+		// Separate task to check for conflicts
+		concat: {
+			conflict: {
+				src: ['test/fixtures/js/*.js'],
+				dest: 'tmp/prod/concatenated.js'
+			}
 		}
 
 	});
@@ -76,7 +84,7 @@ module.exports = function (grunt) {
 	// Whenever the "test" task is run, first clean the "tmp" dir, then run this
 	// plugin's task(s), then test the result.
 	grunt.registerTask('dev', ['env:dev', 'asset_packager:dev']);
-	grunt.registerTask('prod', ['env:prod', 'asset_packager:prod']);
+	grunt.registerTask('prod', ['env:prod', 'asset_packager:prod', 'concat']);	// By running concat here it should undo the uglifying unless cleanup worked
 	grunt.registerTask('test', ['clean', 'dev', 'prod', 'nodeunit']);
 
 	// By default, lint and run all tests.
