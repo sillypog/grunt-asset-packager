@@ -31,15 +31,6 @@ module.exports = function (grunt) {
 			tests: ['tmp']
 		},
 
-		env : {
-			dev : {
-				NODE_ENV : 'DEVELOPMENT'
-			},
-			prod : {
-				NODE_ENV : 'PRODUCTION'
-			}
-		},
-
 		// Configuration to be run (and then tested).
 		asset_packager: {
 			options: {
@@ -81,10 +72,15 @@ module.exports = function (grunt) {
 	// Actually load this plugin's task(s).
 	grunt.loadTasks('tasks');
 
+	// Allow setting the global config that is read by asset_packager
+	grunt.registerTask('set_config', 'Set a config property.', function(name, val){
+		grunt.config.set(name, val);
+	});
+
 	// Whenever the "test" task is run, first clean the "tmp" dir, then run this
 	// plugin's task(s), then test the result.
-	grunt.registerTask('dev', ['env:dev', 'asset_packager:dev']);
-	grunt.registerTask('prod', ['env:prod', 'asset_packager:prod', 'concat']);	// By running concat here it should undo the uglifying unless cleanup worked
+	grunt.registerTask('dev', ['set_config:mode:DEVELOPMENT', 'asset_packager:dev']);
+	grunt.registerTask('prod', ['set_config:mode:PRODUCTION', 'asset_packager:prod', 'concat']);	// By running concat here it should undo the uglifying unless cleanup worked
 	grunt.registerTask('test', ['clean', 'dev', 'prod', 'nodeunit']);
 
 	// By default, lint and run all tests.
