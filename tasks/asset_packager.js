@@ -37,7 +37,7 @@ module.exports = function (grunt) {
 			if (env == 'DEVELOPMENT'){
 				// Replace the package line in the array with a line built from the package
 				return packages[packageName].map(function(packagedFile){
-					return expandLine(match[1], lineOpen, packagedFile, lineClose);
+					return expandLine(match[1], lineOpen, packagedFile.filename, lineClose);
 				}).join(grunt.util.linefeed);
 			} else if (env == 'PRODUCTION'){
 				return expandLine(match[1], lineOpen, packageName, lineClose);
@@ -81,6 +81,18 @@ module.exports = function (grunt) {
 		grunt.task.run('asset_packager_cleanup');
 	}
 
+	function buildPackageContents(content, separator){
+		var files = content.chomp().split(grunt.util.linefeed);
+
+		return _.map(files, function(file){
+			var parts = file.split(separator);
+			return {
+				src_prefix: parts[0],
+				filename: parts[1]
+			};
+		});
+	}
+
 	grunt.registerMultiTask('asset_packager', 'Packages javascript and stylesheets similarly to the smart_asset gem.', function() {
 
 		var options = this.options() || {},
@@ -92,7 +104,7 @@ module.exports = function (grunt) {
 			grunt.log.writeln('\nProcessing asset file: '+file.src);
 			var content = grunt.file.read(file.src),
 			    packageName = path.basename(file.src, path.extname(file.src));
-			    packages[packageName] = content.chomp().split(grunt.util.linefeed);
+			    packages[packageName] = buildPackageContents(content, options.asset_path_separator);
 		}, this);
 
 		if (mode == 'DEVELOPMENT'){
@@ -101,7 +113,10 @@ module.exports = function (grunt) {
 
 			_.forEach(packages, function(packageContent){
 				var mappedContent = packageContent.map(function(packagedFile){
-					return {src: packagedFile, dest: options.dest + path.sep + packagedFile};
+					return {
+						src: packagedFile.src_prefix + packagedFile.filename,
+						dest: options.dest + path.sep + packagedFile.filename
+					};
 				});
 				externalConfigs.copy[this.name].files = externalConfigs.copy[this.name].files.concat(mappedContent);
 			}, this);
