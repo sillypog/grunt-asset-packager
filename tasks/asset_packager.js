@@ -84,7 +84,7 @@ module.exports = function (grunt) {
 	function buildPackageContents(content, separator){
 		var files = content.chomp().split(grunt.util.linefeed);
 
-		return _.map(files, function(file){
+		return files.map(function(file){
 			var parts = file.split(separator);
 			return {
 				src_prefix: parts[0],
