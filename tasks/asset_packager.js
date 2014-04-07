@@ -27,28 +27,30 @@ var fs = require('fs'),
     chomp = require('chomp');
 
 module.exports = function (grunt) {
+	var jsRegex = /js$/,
+	    cssRegex = /css$/
 
 	// Please see the Grunt documentation for more information regarding task
 	// creation: http://gruntjs.com/creating-tasks
 
-	function processLine(packages, match, lineOpen, lineClose, env){
+	function processLine(packages, match, lineOpen, lineClose, env, outputPrefix){
 		var packageName = match[3];
 		if (packages[packageName]){
 			if (env == 'DEVELOPMENT'){
 				// Replace the package line in the array with a line built from the package
 				return packages[packageName].map(function(packagedFile){
-					return expandLine(match[1], lineOpen, packagedFile.filename, lineClose);
+					return expandLine(match[1], lineOpen, outputPrefix, packagedFile.filename, lineClose);
 				}).join(grunt.util.linefeed);
 			} else if (env == 'PRODUCTION'){
-				return expandLine(match[1], lineOpen, packageName, lineClose);
+				return expandLine(match[1], lineOpen, outputPrefix, packageName, lineClose);
 			}
 		} else {
 			grunt.fail.warn('Reference to nonexistant package '+packageName);
 		}
 	}
 
-	function expandLine(whitespace, lineOpen, fileName, lineClose){
-		return whitespace + lineOpen + fileName + lineClose;
+	function expandLine(whitespace, lineOpen, outputPrefix, fileName, lineClose){
+		return whitespace + lineOpen + outputPrefix + fileName + lineClose;
 	}
 
 	function writePartial(match, process, options){
@@ -93,6 +95,16 @@ module.exports = function (grunt) {
 		});
 	}
 
+	function outputPrefix(prefices, packageName){
+		var type;
+		if (jsRegex.test(packageName)){
+			type = 'js';
+		} else if (cssRegex.test(packageName)){
+			type = 'css';
+		}
+		return prefices ? prefices[type] + path.sep : '';
+	}
+
 	grunt.registerMultiTask('asset_packager', 'Packages javascript and stylesheets similarly to the smart_asset gem.', function() {
 
 		var options = this.options() || {},
@@ -111,11 +123,11 @@ module.exports = function (grunt) {
 			// For all of the packages, copy all of their contents
 			createExternalConfig(this.name, externalConfigs, 'copy', null, []);
 
-			_.forEach(packages, function(packageContent){
+			_.forEach(packages, function(packageContent, packageName){
 				var mappedContent = packageContent.map(function(packagedFile){
 					return {
 						src: packagedFile.src_prefix + packagedFile.filename,
-						dest: options.dest + path.sep + packagedFile.filename
+						dest: options.dest + path.sep + outputPrefix(options.output_prefix, packageName) + packagedFile.filename
 					};
 				});
 				externalConfigs.copy[this.name].files = externalConfigs.copy[this.name].files.concat(mappedContent);
@@ -133,14 +145,14 @@ module.exports = function (grunt) {
 
 			// Loop over the packages and populate the files object
 			_.forEach(packages, function(packageContent, packageName){
-				var destination = options.dest + path.sep + packageName,
+				var destination = options.dest + path.sep + outputPrefix(options.output_prefix, packageName) + packageName,
 				    mappedContent = packageContent.map(function(packagedFile){
 				    	return packagedFile.src_prefix + packagedFile.filename;
 				    });
-				if (/js$/.test(destination)){
+				if (jsRegex.test(destination)){
 					externalConfigs.concat[this.name].files[destination] = mappedContent;
 					externalConfigs.uglify[this.name].files[destination] = destination;
-				} else if (/css$/.test(destination)){
+				} else if (cssRegex.test(destination)){
 					externalConfigs.cssmin[this.name].files[destination] = mappedContent;
 				}
 			}, this);
@@ -163,9 +175,9 @@ module.exports = function (grunt) {
 		indexLines.forEach(function(line, i, lines){
 			var match;
 			if (match = line.match(scriptRegEx)){
-				lines[i] = processLine(packages, match, '<script src="', '"></script>', mode);
+				lines[i] = processLine(packages, match, '<script src="', '"></script>', mode, outputPrefix(options.output_prefix, 'js'));
 			} else if (match = line.match(styleRegEx)){
-				lines[i] = processLine(packages, match, '<link rel="stylesheet" href="', '">', mode);
+				lines[i] = processLine(packages, match, '<link rel="stylesheet" href="', '">', mode, outputPrefix(options.output_prefix, 'css'));
 			} else if (match = line.match(partialRegEx)){
 				lines[i] = writePartial(match, processRegEx.test(line), options);
 			}
