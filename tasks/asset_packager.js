@@ -104,7 +104,7 @@ module.exports = function (grunt) {
 			grunt.log.writeln('\nProcessing asset file: '+file.src);
 			var content = grunt.file.read(file.src),
 			    packageName = path.basename(file.src, path.extname(file.src));
-			    packages[packageName] = buildPackageContents(content, options.asset_path_separator);
+			packages[packageName] = buildPackageContents(content, options.asset_path_separator);
 		}, this);
 
 		if (mode == 'DEVELOPMENT'){
@@ -133,12 +133,15 @@ module.exports = function (grunt) {
 
 			// Loop over the packages and populate the files object
 			_.forEach(packages, function(packageContent, packageName){
-				var destination = options.dest + path.sep + packageName;
+				var destination = options.dest + path.sep + packageName,
+				    mappedContent = packageContent.map(function(packagedFile){
+				    	return packagedFile.src_prefix + packagedFile.filename;
+				    });
 				if (/js$/.test(destination)){
-					externalConfigs.concat[this.name].files[destination] = packageContent;
+					externalConfigs.concat[this.name].files[destination] = mappedContent;
 					externalConfigs.uglify[this.name].files[destination] = destination;
 				} else if (/css$/.test(destination)){
-					externalConfigs.cssmin[this.name].files[destination] = packageContent;
+					externalConfigs.cssmin[this.name].files[destination] = mappedContent;
 				}
 			}, this);
 
