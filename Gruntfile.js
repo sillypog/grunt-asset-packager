@@ -68,7 +68,7 @@ module.exports = function (grunt) {
 		concat: {
 			conflict: {
 				src: ['test/fixtures/js/*.js'],
-				dest: 'tmp/prod/concatenated.js'
+				dest: 'tmp/prod/js/concatenated.js'
 			}
 		}
 
