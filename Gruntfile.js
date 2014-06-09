@@ -8,12 +8,17 @@
 
 'use strict';
 
+var testFiles = [{ src: ['test/fixtures/asset_packages/**/*.pkg'], expand: true }],
+    githubRegex = /:(.*)\.git/;
+
 module.exports = function (grunt) {
 	// load all npm grunt tasks
 	require('load-grunt-tasks')(grunt);
 
 	// Project configuration.
 	grunt.initConfig({
+		pkg: grunt.file.readJSON('package.json'),
+
 		jshint: {
 			all: [
 				'Gruntfile.js',
@@ -45,17 +50,13 @@ module.exports = function (grunt) {
 				options: {
 					dest: 'tmp/dev'
 				},
-				files: [
-					{ src: ['test/fixtures/asset_packages/**/*.pkg'], expand: true }
-				]
+				files: testFiles
 			},
 			prod: {
 				options: {
 					dest: 'tmp/prod'
 				},
-				files: [
-					{ src: ['test/fixtures/asset_packages/**/*.pkg'], expand: true }
-				]
+				files: testFiles
 			}
 		},
 
@@ -69,6 +70,17 @@ module.exports = function (grunt) {
 			conflict: {
 				src: ['test/fixtures/js/*.js'],
 				dest: 'tmp/prod/js/concatenated.js'
+			}
+		},
+
+		release: {
+			options: {
+				commitMessage: 'Version <%= version %>',
+				github: {
+					repo: '<%= pkg.repository.url.match(githubRegex)[1] %>',
+					usernameVar: 'GITHUB_USERNAME', //ENVIRONMENT VARIABLE that contains Github username
+					passwordVar: 'GITHUB_PASSWORD' //ENVIRONMENT VARIABLE that contains Github password
+				}
 			}
 		}
 

@@ -28,7 +28,7 @@ var fs = require('fs'),
 
 module.exports = function (grunt) {
 	var jsRegex = /js$/,
-	    cssRegex = /css$/
+	    cssRegex = /css$/;
 
 	// Please see the Grunt documentation for more information regarding task
 	// creation: http://gruntjs.com/creating-tasks
