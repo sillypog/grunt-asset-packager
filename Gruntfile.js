@@ -8,9 +8,6 @@
 
 'use strict';
 
-var testFiles = [{ src: ['test/fixtures/asset_packages/**/*.pkg'], expand: true }],
-    githubRegex = /:(.*)\.git/;
-
 module.exports = function (grunt) {
 	// load all npm grunt tasks
 	require('load-grunt-tasks')(grunt);
@@ -18,6 +15,8 @@ module.exports = function (grunt) {
 	// Project configuration.
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
+		githubRegex: /:(.*)\.git/,
+		testFiles: [{ src: ['test/fixtures/asset_packages/**/*.pkg'], expand: true }],
 
 		jshint: {
 			all: [
@@ -45,13 +44,13 @@ module.exports = function (grunt) {
 				options: {
 					dest: 'tmp/dev'
 				},
-				files: testFiles
+				files: '<%= testFiles %>'
 			},
 			prod: {
 				options: {
 					dest: 'tmp/prod'
 				},
-				files: testFiles
+				files: '<%= testFiles %>'
 			}
 		},
 
