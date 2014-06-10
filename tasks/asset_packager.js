@@ -105,12 +105,29 @@ module.exports = function (grunt) {
 		return prefices ? prefices[type] + path.sep : '';
 	}
 
+	function checkConfiguration(options, mode){
+		if (!options.index){
+			grunt.fail.warn('index option is not set', 3);
+		}
+		if (!_.contains(['DEVELOPMENT','PRODUCTION'],mode)){
+			grunt.fail.warn('mode must be set to DEVELOPMENT or PRODUCTION', 3);
+		}
+	}
+
 	grunt.registerMultiTask('asset_packager', 'Packages javascript and stylesheets similarly to the smart_asset gem.', function() {
 
-		var options = this.options() || {},
+		var options = this.options({
+		    	asset_path_separator: ' ',
+		    	output_prefix: {
+		    		js: 'js',
+		    		css: 'css'
+		    	}
+		    }),
 		    mode = grunt.config.get('mode'),
 		    packages = {},
 		    externalConfigs = {};
+
+		checkConfiguration(options, mode);
 
 		this.files.forEach(function(file){
 			grunt.log.writeln('\nProcessing asset file: '+file.src);

@@ -7,8 +7,8 @@ This task makes it easy to compile local and production versions of a static sit
 
 For example, a package file named `common.js` might contain the following lines:
 ```
-src/js/file1.js
-src/js/file2/js
+src/js/ file1.js
+src/js/ file2.js
 ```
 
 `index.html` would then have this tag referencing that package:
@@ -18,7 +18,7 @@ src/js/file2/js
 
 When the task is run with NODE_ENV set to 'DEVELOPMENT' [(see grunt-env)](https://npmjs.org/package/grunt-env), the javascript files will be copied to the build directory and the `<script-package>` tag replaced by `<script>` tags including each file.
 
-When the task is run with NODE_ENV set to 'PRODUCTION', the javascript files will be concatenated and uglified into a single file named `common.js` and the `<script-package>` tag replaced by a single `<script>` tag including that file.
+When the task is run with a grunt config variable named 'mode' set to 'PRODUCTION', the javascript files will be concatenated and uglified into a single file named `common.js` and the `<script-package>` tag replaced by a single `<script>` tag including that file.
 
 Unprocessed files can also be included at any point using `<script-partial>` tags.
 
@@ -68,6 +68,26 @@ Default value: `'.'`
 
 Path to the folder that will contained the final compiled index file and assets.
 
+#### options.asset_path_separator
+Type: `String`
+Default value: `' '`
+
+Allows normalization of filepaths between builds of different modes. In package files, anything after this character will be copied into the build directory.
+
+Eg, if the path in the asset folder is written as:
+src/js/ module/file.js
+
+The build directory will contain:
+module/file.js
+
+#### options.output_prefix
+Type: `Object`
+Default value: `{ js: 'js', css: 'css' }`
+
+Group files in the build directory under these folders, eg:
+js/module/file.js
+css/module/file.css
+
 ### Usage Example
 
 In this example, index and asset files live within the `src` folder. These will be compiled to a new folder named `build`.
@@ -76,17 +96,35 @@ In this example, index and asset files live within the `src` folder. These will 
 grunt.initConfig({
   asset_packager: {
     options: {
-	    index: 'src/index.html',
-	    dest: 'build'
-	   },
-	   build: {
-	    files: [
-	    	{ src: ['src/asset_packages/**/*.pkg'], expand: true}
-	    ]
-	   }
+      index: 'src/index.html',
+      dest: 'build'
+     },
+     build: {
+      files: [
+        { src: ['src/asset_packages/**/*.pkg'], expand: true}
+      ]
+     }
   },
 })
 ```
+
+## Setting the mode
+
+asset_packager expects a grunt config variable named 'mode' to be set to either
+'DEVELOPMENT' or 'PRODUCTION'. Below is an example of how this can be done.
+
+```
+// Allow setting the global config that is read by asset_packager
+grunt.registerTask('set_config', 'Set a config property.', function(name, val){
+  grunt.config.set(name, val);
+});
+
+grunt.registerTask('dev', ['set_config:mode:DEVELOPMENT', 'asset_packager']);
+grunt.registerTask('prod', ['set_config:mode:PRODUCTION', 'asset_packager']);
+```
+
+The mode must be set, there is no default option.
+
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
