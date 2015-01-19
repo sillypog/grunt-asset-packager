@@ -27,11 +27,63 @@ var fs = require('fs'),
     chomp = require('chomp');
 
 module.exports = function (grunt) {
-	var jsRegex = /js$/,
-	    cssRegex = /css$/;
+	// Regex use backreferencing (eg \1) to identify the type of quote used and select everything between that set.
+	// This still probably won't work with escaped quotes within a string
+	var regex = {
+		js: /js$/,
+		css: /css$/,
+		partial: /(\s*)<script-partial src=(["|'])([^\2]+?)\2/,
+		process: /process=(["|'])true\1/,
+		script: /(\s*)<script-package src=(["|'])([^\2]+?)\2/,
+		style: /(\s*)<style-package src=(["|'])([^\2]+?)\2/  // Storing the whitespace so we can preserve it
+	};
 
 	// Please see the Grunt documentation for more information regarding task
 	// creation: http://gruntjs.com/creating-tasks
+
+	function writeIncludes(options, mode, packages){
+		// Want to write an include file for each package
+		// The content will be determined by the mode
+		// - dev: a script tag for each file in the package
+		// - prod: a single script tag with the name of the package
+		// Include file extension should be .html, not .js
+
+		_.each(packages, function(value, key){
+			var includeName = key.replace(/\..*/, '.html'),
+			    fileContent;
+			if (mode == 'DEVELOPMENT'){
+				fileContent = value.map(function(packagedFile){
+					return '<script src="' + options.output_prefix.js + path.sep + packagedFile.filename + '"></script>';
+				}).join(grunt.util.linefeed);
+			} else if (mode == 'PRODUCTION'){
+				fileContent = '<script src="' + options.output_prefix.js + path.sep + key + '"></script>';
+			}
+			grunt.file.write(options.js.includes + path.sep + includeName, fileContent);
+		});
+	}
+
+	function writeIndexFile(options, mode, packages){
+		// Get the file defined for index
+		// Read through it and when reaching a marker
+		// Replace the marker with the contents of the appropriate package from package object
+		var indexContent = grunt.file.read(options.index),
+		    indexLines = indexContent.split(grunt.util.linefeed);
+
+		indexLines.forEach(function(line, i, lines){
+			var match;
+			if (match = line.match(regex.script)){
+				lines[i] = processLine(packages, match, '<script src="', '"></script>', mode, outputPrefix(options.output_prefix, 'js'));
+			} else if (match = line.match(regex.style)){
+				lines[i] = processLine(packages, match, '<link rel="stylesheet" href="', '">', mode, outputPrefix(options.output_prefix, 'css'));
+			} else if (match = line.match(regex.partial)){
+				lines[i] = writePartial(match, regex.process.test(line), options);
+			}
+		}, this);
+
+		var indexOutput = indexLines.join(grunt.util.linefeed);
+
+		grunt.file.write(options.dest + path.sep + 'index.html', indexOutput);
+	}
 
 	function processLine(packages, match, lineOpen, lineClose, env, outputPrefix){
 		var packageName = match[3];
@@ -97,18 +149,35 @@ module.exports = function (grunt) {
 
 	function outputPrefix(prefices, packageName){
 		var type;
-		if (jsRegex.test(packageName)){
+		if (regex.js.test(packageName)){
 			type = 'js';
-		} else if (cssRegex.test(packageName)){
+		} else if (regex.css.test(packageName)){
 			type = 'css';
 		}
 		return prefices ? prefices[type] + path.sep : '';
 	}
 
 	function checkConfiguration(options, mode){
-		if (!options.index){
-			grunt.fail.warn('index option is not set', 3);
+		if (options.index){
+			if (options.js) {
+				grunt.fail.warn('index and js options are both set', 3);
+			}
+			if (!options.dest){
+				grunt.fail.warn('no dest specified for output', 3);
+			}
+		} else {
+			if (options.js){
+				if (!options.js.includes){
+					grunt.fail.warn('no js includes output directory specified', 3);
+				}
+				if (!options.js.source){
+					grunt.fail.warn('no js source output directory specified', 3);
+				}
+			} else {
+				grunt.fail.warn('neither index nor js option is set', 3);
+			}
 		}
+
 		if (!_.contains(['DEVELOPMENT','PRODUCTION'],mode)){
 			grunt.fail.warn('mode must be set to DEVELOPMENT or PRODUCTION', 3);
 		}
@@ -127,6 +196,8 @@ module.exports = function (grunt) {
 		    packages = {},
 		    externalConfigs = {};
 
+		options.sourceDest = options.dest || options.js.source;
+
 		checkConfiguration(options, mode);
 
 		this.files.forEach(function(file){
@@ -144,7 +215,7 @@ module.exports = function (grunt) {
 				var mappedContent = packageContent.map(function(packagedFile){
 					return {
 						src: packagedFile.src_prefix + packagedFile.filename,
-						dest: options.dest + path.sep + outputPrefix(options.output_prefix, packageName) + packagedFile.filename
+						dest: options.sourceDest + path.sep + outputPrefix(options.output_prefix, packageName) + packagedFile.filename
 					};
 				});
 				externalConfigs.copy[this.name].files = externalConfigs.copy[this.name].files.concat(mappedContent);
@@ -162,14 +233,14 @@ module.exports = function (grunt) {
 
 			// Loop over the packages and populate the files object
 			_.forEach(packages, function(packageContent, packageName){
-				var destination = options.dest + path.sep + outputPrefix(options.output_prefix, packageName) + packageName,
+				var destination = options.sourceDest + path.sep + outputPrefix(options.output_prefix, packageName) + packageName,
 				    mappedContent = packageContent.map(function(packagedFile){
 				    	return packagedFile.src_prefix + packagedFile.filename;
 				    });
-				if (jsRegex.test(destination)){
+				if (regex.js.test(destination)){
 					externalConfigs.concat[this.name].files[destination] = mappedContent;
 					externalConfigs.uglify[this.name].files[destination] = destination;
-				} else if (cssRegex.test(destination)){
+				} else if (regex.css.test(destination)){
 					externalConfigs.cssmin[this.name].files[destination] = mappedContent;
 				}
 			}, this);
@@ -177,31 +248,10 @@ module.exports = function (grunt) {
 			runTasks(this.name, externalConfigs, ['concat', 'uglify', 'cssmin']);
 		}
 
-		// Get the file defined for index
-		// Read through it and when reaching a marker
-		// Replace the marker with the contents of the appropriate package from package object
-		var indexContent = grunt.file.read(options.index),
-		    indexLines = indexContent.split(grunt.util.linefeed),
-		    // Regex use backreferencing (eg \1) to identify the type of quote used and select everything between that set.
-		    // This still probably won't work with escaped quotes within a string
-		    partialRegEx = /(\s*)<script-partial src=(["|'])([^\2]+?)\2/,
-		    processRegEx = /process=(["|'])true\1/,
-		    scriptRegEx = /(\s*)<script-package src=(["|'])([^\2]+?)\2/,
-		    styleRegEx = /(\s*)<style-package src=(["|'])([^\2]+?)\2/;  // Storing the whitespace so we can preserve it
-
-		indexLines.forEach(function(line, i, lines){
-			var match;
-			if (match = line.match(scriptRegEx)){
-				lines[i] = processLine(packages, match, '<script src="', '"></script>', mode, outputPrefix(options.output_prefix, 'js'));
-			} else if (match = line.match(styleRegEx)){
-				lines[i] = processLine(packages, match, '<link rel="stylesheet" href="', '">', mode, outputPrefix(options.output_prefix, 'css'));
-			} else if (match = line.match(partialRegEx)){
-				lines[i] = writePartial(match, processRegEx.test(line), options);
-			}
-		}, this);
-
-		var indexOutput = indexLines.join(grunt.util.linefeed);
-
-		grunt.file.write(options.dest + path.sep + 'index.html', indexOutput);
+		if (options.index) {
+			writeIndexFile(options, mode, packages);
+		} else if (options.js.includes) {
+			writeIncludes(options, mode, packages);
+		}
 	});
 };
