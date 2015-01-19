@@ -62,7 +62,7 @@ module.exports = function (grunt) {
 		});
 	}
 
-	function writeIndexFile(options, mode, packages){
+	function writeIndexFile(options, mode, packages, context){
 		// Get the file defined for index
 		// Read through it and when reaching a marker
 		// Replace the marker with the contents of the appropriate package from package object
@@ -78,7 +78,7 @@ module.exports = function (grunt) {
 			} else if (match = line.match(regex.partial)){
 				lines[i] = writePartial(match, regex.process.test(line), options);
 			}
-		}, this);
+		}, context);
 
 		var indexOutput = indexLines.join(grunt.util.linefeed);
 
@@ -249,7 +249,7 @@ module.exports = function (grunt) {
 		}
 
 		if (options.index) {
-			writeIndexFile(options, mode, packages);
+			writeIndexFile(options, mode, packages, this);
 		} else if (options.js.includes) {
 			writeIncludes(options, mode, packages);
 		}
