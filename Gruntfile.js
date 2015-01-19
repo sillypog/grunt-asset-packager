@@ -16,7 +16,7 @@ module.exports = function (grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		githubRegex: /:(.*)\.git/,
-		testFiles: [{ src: ['test/fixtures/asset_packages/**/*.pkg'], expand: true }],
+		testStaticFiles: [{ src: ['test/fixtures/static/asset_packages/**/*.pkg'], expand: true }],
 
 		jshint: {
 			all: [
@@ -38,19 +38,19 @@ module.exports = function (grunt) {
 		// Configuration to be run (and then tested).
 		asset_packager: {
 			options: {
-				index: 'test/fixtures/index.html'
+				index: 'test/fixtures/static/index.html'
 			},
 			dev: {
 				options: {
-					dest: 'tmp/dev'
+					dest: 'tmp/static/dev'
 				},
-				files: '<%= testFiles %>'
+				files: '<%= testStaticFiles %>'
 			},
 			prod: {
 				options: {
-					dest: 'tmp/prod'
+					dest: 'tmp/static/prod'
 				},
-				files: '<%= testFiles %>'
+				files: '<%= testStaticFiles %>'
 			}
 		},
 
@@ -62,8 +62,8 @@ module.exports = function (grunt) {
 		// Separate task to check for conflicts
 		concat: {
 			conflict: {
-				src: ['test/fixtures/js/*.js'],
-				dest: 'tmp/prod/js/concatenated.js'
+				src: ['test/fixtures/static/js/*.js'],
+				dest: 'tmp/static/prod/js/concatenated.js'
 			}
 		},
 
