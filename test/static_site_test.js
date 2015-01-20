@@ -61,8 +61,8 @@ exports.asset_packager = {
 		var actualCSSLines = grunt.file.read('tmp/static/prod/css/common.css').split(grunt.util.linefeed),
 		    expectedCSSLines = grunt.file.read('test/expected/static/prod/css/common.css').split(grunt.util.linefeed);
 
-		test.equal(actualCSSLines.length, 2, 'packaged css should contain 2 lines.');
-		test.equal(actualCSSLines[1], expectedCSSLines[1], 'should concat and minify css');
+		test.equal(actualCSSLines.length, 1, 'packaged css should contain 2 lines.');
+		test.equal(actualCSSLines[0], expectedCSSLines[0], 'should concat and minify css');
 
 		test.ok(grunt.file.exists('tmp/static/prod/js/concatenated.js'));
 
