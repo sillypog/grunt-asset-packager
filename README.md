@@ -1,6 +1,6 @@
 # grunt-asset-packager [![Build Status](https://travis-ci.org/sillypog/grunt-asset-packager.png?branch=master)](https://travis-ci.org/sillypog/grunt-asset-packager) [![Dependency Status](https://david-dm.org/sillypog/grunt-asset-packager.png)](https://david-dm.org/sillypog/grunt-asset-packager) [![devDependency Status](https://david-dm.org/sillypog/grunt-asset-packager/dev-status.png)](https://david-dm.org/sillypog/grunt-asset-packager#info=devDependencies)
 
-> Packages javascript and stylesheets similarly to the smart_asset gem.
+> Packages javascript and stylesheets similarly to the Rails asset pipeline.
 
 ## Why use asset-packager?
 This task makes it easy to compile local and production versions of a static site. Rather than putting stylesheet and javascript includes directly in the html file they are put into package files; it is the package files that are referenced from the html file.
@@ -16,9 +16,9 @@ src/js/ file2.js
 <script-package src="common.js" />
 ```
 
-When the task is run with NODE_ENV set to 'DEVELOPMENT' [(see grunt-env)](https://npmjs.org/package/grunt-env), the javascript files will be copied to the build directory and the `<script-package>` tag replaced by `<script>` tags including each file.
+When the task is run in DEVELOPMENT mode, the javascript files will be copied to the build directory and the `<script-package>` tag replaced by `<script>` tags including each file.
 
-When the task is run with a grunt config variable named 'mode' set to 'PRODUCTION', the javascript files will be concatenated and uglified into a single file named `common.js` and the `<script-package>` tag replaced by a single `<script>` tag including that file.
+When the task is run in PRODUCTION mode, the javascript files will be concatenated and uglified into a single file named `common.js` and the `<script-package>` tag replaced by a single `<script>` tag including that file.
 
 Unprocessed files can also be included at any point using `<script-partial>` tags.
 
@@ -60,13 +60,23 @@ grunt.initConfig({
 #### options.index
 Type: `String`
 
-Path to the index file containing package includes.
+For static site projects with a single html file defining all script and style includes. This sets the path to the index file containing package includes.
 
 #### options.dest
 Type: `String`
 Default value: `'.'`
 
-Path to the folder that will contained the final compiled index file and assets.
+For static site projects with a single html file defining all script and style includes. This sets the path to the folder that will contained the final compiled index file and assets.
+
+#### options.js.source
+Type: `String`
+
+For projects with js includes defined in multiple files. This sets the path to write javascript source files to.
+
+#### options.js.includes
+Type: `String`
+
+For projects with js includes defined in multiple files. This sets the path to write the files containing the `<script>` tags. The include files will have the name of the asset package, for example main.js.pkg generates an include file named main.html.
 
 #### options.asset_path_separator
 Type: `String`
