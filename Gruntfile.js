@@ -16,7 +16,7 @@ module.exports = function (grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		githubRegex: /:(.*)\.git/,
-		testFiles: [{ src: ['test/fixtures/asset_packages/**/*.pkg'], expand: true }],
+		testStaticFiles: [{ src: ['test/fixtures/static/asset_packages/**/*.pkg'], expand: true }],
 
 		jshint: {
 			all: [
@@ -37,20 +37,37 @@ module.exports = function (grunt) {
 
 		// Configuration to be run (and then tested).
 		asset_packager: {
-			options: {
-				index: 'test/fixtures/index.html'
-			},
 			dev: {
 				options: {
-					dest: 'tmp/dev'
+					index: 'test/fixtures/static/index.html',
+					dest: 'tmp/static/dev'
 				},
-				files: '<%= testFiles %>'
+				files: '<%= testStaticFiles %>'
 			},
 			prod: {
 				options: {
-					dest: 'tmp/prod'
+					index: 'test/fixtures/static/index.html',
+					dest: 'tmp/static/prod'
 				},
-				files: '<%= testFiles %>'
+				files: '<%= testStaticFiles %>'
+			},
+			jade_dev: {
+				options: {
+					js: {
+						includes: 'tmp/jade/dev/app/views/includes',
+						source: 'tmp/jade/dev/public'
+					}
+				},
+				files: [{ src: ['test/fixtures/jade/assets/packages/**/*.pkg'], expand: true }],
+			},
+			jade_prod: {
+				options: {
+					js: {
+						includes: 'tmp/jade/prod/app/views/includes',
+						source: 'tmp/jade/prod/public'
+					}
+				},
+				files: [{ src: ['test/fixtures/jade/assets/packages/**/*.pkg'], expand: true }],
 			}
 		},
 
@@ -62,8 +79,8 @@ module.exports = function (grunt) {
 		// Separate task to check for conflicts
 		concat: {
 			conflict: {
-				src: ['test/fixtures/js/*.js'],
-				dest: 'tmp/prod/js/concatenated.js'
+				src: ['test/fixtures/static/js/*.js'],
+				dest: 'tmp/static/prod/js/concatenated.js'
 			}
 		},
 
@@ -92,7 +109,9 @@ module.exports = function (grunt) {
 	// plugin's task(s), then test the result.
 	grunt.registerTask('dev', ['set_config:mode:DEVELOPMENT', 'asset_packager:dev']);
 	grunt.registerTask('prod', ['set_config:mode:PRODUCTION', 'asset_packager:prod', 'concat']);	// By running concat here it should undo the uglifying unless cleanup worked
-	grunt.registerTask('test', ['clean', 'dev', 'prod', 'nodeunit']);
+	grunt.registerTask('jade_dev', ['set_config:mode:DEVELOPMENT', 'asset_packager:jade_dev']);
+	grunt.registerTask('jade_prod', ['set_config:mode:PRODUCTION', 'asset_packager:jade_prod']);
+	grunt.registerTask('test', ['clean', 'dev', 'prod', 'jade_dev', 'jade_prod', 'nodeunit']);
 
 	// By default, lint and run all tests.
 	grunt.registerTask('default', ['jshint', 'test']);
