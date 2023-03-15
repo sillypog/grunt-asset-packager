@@ -9,9 +9,6 @@
 
 'use strict';
 
-var util = require('util'),
-	_ = require('lodash');
-
 module.exports = function (grunt) {
 
 	// Please see the Grunt documentation for more information regarding task
@@ -21,7 +18,7 @@ module.exports = function (grunt) {
 		var parentTask = 'asset_packager',
 			dirtyTasks = ['copy', 'concat', 'uglify', 'cssmin'];
 
-		_.forEach(dirtyTasks, function(dirtyTask){
+		dirtyTasks.forEach(function(dirtyTask) {
 			var dirtyConfig = grunt.config(dirtyTask);
 
 			if (dirtyConfig && dirtyConfig[parentTask]){
