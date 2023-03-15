@@ -1,6 +1,6 @@
 {
   "name": "grunt-asset-packager",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Packages javascript and stylesheets similarly to the smart_asset gem.",
   "homepage": "https://github.com/sillypog/grunt-asset-packager",
   "repository": {
@@ -18,36 +18,32 @@
   ],
   "main": "Gruntfile.js",
   "engines": {
-    "node": ">= 0.10.0"
+    "node": ">= 18.11.0"
   },
   "licenses": [
     {
       "type": "MIT"
     }
   ],
-  "dependencies": {
-    "lodash": ">=2.4.1 <3",
-    "chomp": "0.x"
-  },
+  "dependencies": {},
   "peerDependencies": {
-    "grunt": ">=0.4.0rc2 <1",
-    "grunt-contrib-concat": ">=0.3 <1",
-    "grunt-contrib-uglify": ">=0.2.7 <1",
-    "grunt-contrib-cssmin": ">=0.7 <1",
-    "grunt-contrib-copy": ">=0.4.1 <1"
+    "grunt": "^1.6.1",
+    "grunt-contrib-concat": "^2.1.0",
+    "grunt-contrib-uglify": "^5.2.2",
+    "grunt-contrib-cssmin": "^4.0.0",
+    "grunt-contrib-copy": "^1.0.0"
   },
   "devDependencies": {
-    "load-grunt-tasks": ">=0.2 <1",
-    "grunt-contrib-jshint": ">=0.7 <1",
-    "grunt-contrib-nodeunit": ">=0.2 <1",
-    "grunt-contrib-clean": ">=0.5 <1",
-    "jshint-stylish": ">=0.1.3 <1",
-    "grunt": ">=0.4.0rc2 <1",
-    "grunt-contrib-concat": ">=0.3 <1",
-    "grunt-contrib-uglify": ">=0.2.7 <1",
-    "grunt-contrib-cssmin": ">=0.7 <1",
-    "grunt-contrib-copy": ">=0.4.1 <1",
-    "grunt-release": "^0.7.0"
+    "load-grunt-tasks": "^5.1.0",
+    "grunt-contrib-jshint": "^3.2.0",
+    "grunt-contrib-nodeunit": "^4.0.0",
+    "grunt-contrib-clean": "^2.0.1",
+    "jshint-stylish": "^2.2.1",
+    "grunt": "^1.6.1",
+    "grunt-contrib-concat": "^2.1.0",
+    "grunt-contrib-uglify": "^5.2.2",
+    "grunt-contrib-cssmin": "^4.0.0",
+    "grunt-contrib-copy": "^1.0.0"
   },
   "scripts": {
     "test": "grunt test"

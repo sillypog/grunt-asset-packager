@@ -84,17 +84,6 @@ module.exports = function (grunt) {
 			}
 		},
 
-		release: {
-			options: {
-				commitMessage: 'Version <%= version %>',
-				github: {
-					repo: '<%= pkg.repository.url.match(githubRegex)[1] %>',
-					usernameVar: 'GITHUB_USERNAME', //ENVIRONMENT VARIABLE that contains Github username
-					passwordVar: 'GITHUB_PASSWORD' //ENVIRONMENT VARIABLE that contains Github password
-				}
-			}
-		}
-
 	});
 
 	// Actually load this plugin's task(s).

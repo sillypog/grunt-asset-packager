@@ -22,9 +22,7 @@
 
 var fs = require('fs'),
     path = require('path'),
-    util = require('util'),
-    _ = require('lodash'),
-    chomp = require('chomp');
+    util = require('util');
 
 module.exports = function (grunt) {
 	// Regex use backreferencing (eg \1) to identify the type of quote used and select everything between that set.
@@ -48,7 +46,8 @@ module.exports = function (grunt) {
 		// - prod: a single script tag with the name of the package
 		// Include file extension should be .html, not .js
 
-		_.each(packages, function(value, key){
+		Object.entries(packages).forEach(function(entry){
+			var [key, value] = entry;
 			var includeName = key.replace(/\..*/, '.html'),
 			    fileContent;
 			if (mode == 'DEVELOPMENT'){
@@ -136,7 +135,7 @@ module.exports = function (grunt) {
 	}
 
 	function buildPackageContents(content, separator){
-		var files = content.chomp().split(grunt.util.linefeed);
+		var files = content.trim().split(grunt.util.linefeed);
 
 		return files.map(function(file){
 			var parts = file.split(separator);
@@ -178,7 +177,7 @@ module.exports = function (grunt) {
 			}
 		}
 
-		if (!_.contains(['DEVELOPMENT','PRODUCTION'],mode)){
+		if (!['DEVELOPMENT','PRODUCTION'].includes(mode)) {
 			grunt.fail.warn('mode must be set to DEVELOPMENT or PRODUCTION', 3);
 		}
 	}
@@ -202,8 +201,9 @@ module.exports = function (grunt) {
 
 		this.files.forEach(function(file){
 			grunt.log.writeln('\nProcessing asset file: '+file.src);
-			var content = grunt.file.read(file.src),
-			    packageName = path.basename(file.src, path.extname(file.src));
+			var src = file.src[0],
+			    content = grunt.file.read(src),
+			    packageName = path.basename(src, path.extname(src));
 			packages[packageName] = buildPackageContents(content, options.asset_path_separator);
 		}, this);
 
@@ -211,7 +211,8 @@ module.exports = function (grunt) {
 			// For all of the packages, copy all of their contents
 			createExternalConfig(this.name, externalConfigs, 'copy', null, []);
 
-			_.forEach(packages, function(packageContent, packageName){
+			Object.entries(packages).forEach(entry => {
+				var [packageName, packageContent] = entry;
 				var mappedContent = packageContent.map(function(packagedFile){
 					return {
 						src: packagedFile.src_prefix + packagedFile.filename,
@@ -219,7 +220,7 @@ module.exports = function (grunt) {
 					};
 				});
 				externalConfigs.copy[this.name].files = externalConfigs.copy[this.name].files.concat(mappedContent);
-			}, this);
+			});
 
 			runTasks(this.name, externalConfigs, ['copy']);
 
@@ -232,7 +233,8 @@ module.exports = function (grunt) {
 			createExternalConfig(this.name, externalConfigs, 'cssmin', { });
 
 			// Loop over the packages and populate the files object
-			_.forEach(packages, function(packageContent, packageName){
+			Object.entries(packages).forEach(entry => {
+				var [packageName, packageContent] = entry;
 				var destination = options.sourceDest + path.sep + outputPrefix(options.output_prefix, packageName) + packageName,
 				    mappedContent = packageContent.map(function(packagedFile){
 				    	return packagedFile.src_prefix + packagedFile.filename;
@@ -243,7 +245,7 @@ module.exports = function (grunt) {
 				} else if (regex.css.test(destination)){
 					externalConfigs.cssmin[this.name].files[destination] = mappedContent;
 				}
-			}, this);
+			});
 
 			runTasks(this.name, externalConfigs, ['concat', 'uglify', 'cssmin']);
 		}
