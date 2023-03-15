@@ -1,4 +1,4 @@
-# grunt-asset-packager [![Build Status](https://travis-ci.org/sillypog/grunt-asset-packager.png?branch=master)](https://travis-ci.org/sillypog/grunt-asset-packager) [![Dependency Status](https://david-dm.org/sillypog/grunt-asset-packager.png)](https://david-dm.org/sillypog/grunt-asset-packager) [![devDependency Status](https://david-dm.org/sillypog/grunt-asset-packager/dev-status.png)](https://david-dm.org/sillypog/grunt-asset-packager#info=devDependencies)
+# grunt-asset-packager ![Build Status](https://github.com/sillypog/grunt-asset-packager/actions/workflows/test.yml/badge.svg?branch=main)
 
 > Packages javascript and stylesheets similarly to the Rails asset pipeline.
 
